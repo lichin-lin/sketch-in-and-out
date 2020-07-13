@@ -1,0 +1,71 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sketch-hq/SketchAPI/develop/docs/sketch-plugin-manifest-schema.json",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "script": "./add-spacing.js",
+      "shortcut": "",
+      "handler": "addSpacing",
+      "name": "Add Spacing",
+      "identifier": "addSpacing"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddBoth",
+      "name": "Add Line Fragments & Baselines",
+      "identifier": "fragmentsandbaselines"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddBaselines",
+      "name": "Add Baselines",
+      "identifier": "baselines"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddLineFragments",
+      "name": "Add Line Fragments",
+      "identifier": "fragments"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onUseLegacyBaselines",
+      "name": "Use Legacy Typesetter",
+      "identifier": "legacyTypesetter"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onUseConstantBaselines",
+      "name": "Use Constant Baselines Typesetter",
+      "identifier": "constantBaselinesTypesetter"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddTextAllFixedAnnotation",
+      "name": "[Text] All Fixed",
+      "identifier": "onAddTextAllFixedAnnotation"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddTextAllDynamicAnnotation",
+      "name": "[Text] All Dynamic",
+      "identifier": "onAddTextAllDynamicAnnotation"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddTextFixedWidthAnnotation",
+      "name": "[Text] Fixed Width",
+      "identifier": "onAddTextFixedWidthAnnotation"
+    }
+  ],
+  "menu": {
+    "title": "🈵spacing-annotation",
+    "items": [
+      "addSpacing",
+      "-",
+      "onAddTextAllFixedAnnotation",
+      "onAddTextAllDynamicAnnotation",
+      "onAddTextFixedWidthAnnotation"
+    ]
+  }
+}
