@@ -2,8 +2,6 @@ import sketch from 'sketch'
 const FIXED_COLOR = '#FF5544';
 const DYNAMIC_COLOR = '#0AF';
 
-// documentation: https://developer.sketchapp.com/reference/api/
-
 export const addSpacing = (context) => {
   // check selection
   const document = sketch.fromNative(context.document)
@@ -28,23 +26,6 @@ export const addSpacing = (context) => {
     })
   }
 }
-
-
-// TEXT UTILS
-// Text Utilities, by Johnnie Walker — Source code available at [GitHub](https://github.com/sketch-hq/SketchAPI/tree/develop/examples/text-utilities)
-//
-// This plugin provides some debugging tools which annotate text layers to show where their baselines and bounding boxes are.
-
-// The plugin illustrates a few techniques:
-// - iterating over the selected layers
-// - iterating over the position of each line in a text layer
-// - creating new layers
-// - defining multiple commands in a single plugin
-// ### Some Utilities
-// First up, we want to define a few utility functions to help us in implementing the plugin commands.
-
-// #### Processing Fragments
-// The first of these takes a container, a list of line fragments, and an action function which it applies to each fragment.
 
 function processFragments(container, fragments, action) {
   // We first move the container to the back of the document.
@@ -100,6 +81,8 @@ function addLineFragments(layer, fragments) {
   })
 
   // The we process each fragment in turn
+  sketch.UI.message('container: ', container)
+  sketch.UI.message('fragments: ', JSON.Sfragments)
   processFragments(container, fragments, (group, fragment, index) => {
     // We alternate the color of the lines, so that we can tell them apart
     const color = index % 1 ? '#00ff00ff' : '#00ff0044'
@@ -127,7 +110,7 @@ export function onAddLineFragments(context) {
 
   // Iterate over each text layer in the selection, calling our addLineFragments function
   document.selectedLayers.forEach((layer) => {
-    if (layer.type === String(sketch.Types.Text)) {
+    if (true || layer.type === String(sketch.Types.Text)) {
       addLineFragments(layer, layer.fragments)
     }
   })
@@ -181,13 +164,13 @@ export function onUseConstantBaselines(context) {
   })
 }
 
-
+// PICO_STYLE
 export function onAddTextAllFixedAnnotation(context) {
   const document = sketch.fromNative(context.document)
 
   // Iterate over each text layer in the selection, calling our addBaselines function
   document.selectedLayers.forEach((layer) => {
-    if (layer.type === String(sketch.Types.Text)) {
+    if (true || layer.type === String(sketch.Types.Text)) {
       onHandleTextAllFixedAnnotation(layer, layer.fragments)
     }
   })
@@ -200,11 +183,6 @@ export function onHandleTextAllFixedAnnotation(layer, fragments) {
   })
   // The we process each fragment in turn
   processFragments(container, fragments, (group, fragment, index) => {
-    // const color = index % 1 ? '#00ff00ff' : '#00ff0044'
-    // const rect = layer.localRectToParentRect(fragment.rect)
-    // rect.y += rect.height - fragment.baselineOffset
-    // rect.height = 0.5
-    // We make a new shape layer with the rectangle of each line in turn
     const localRect = layer.localRectToParentRect(fragment.rect)
     new sketch.Shape({
       parent: group,
@@ -222,7 +200,7 @@ export function onAddTextAllDynamicAnnotation(context) {
 
   // Iterate over each text layer in the selection, calling our addBaselines function
   document.selectedLayers.forEach((layer) => {
-    if (layer.type === String(sketch.Types.Text)) {
+    if (true || layer.type === String(sketch.Types.Text)) {
       onHandleTextAllDynamicAnnotation(layer, layer.fragments)
     }
   })
@@ -250,13 +228,12 @@ export function onHandleTextAllDynamicAnnotation(layer, fragments) {
     })
   })
 }
-
 export function onAddTextFixedWidthAnnotation(context) {
   const document = sketch.fromNative(context.document)
 
   // Iterate over each text layer in the selection, calling our addBaselines function
   document.selectedLayers.forEach((layer) => {
-    if (layer.type === String(sketch.Types.Text)) {
+    if (true || layer.type === String(sketch.Types.Text)) {
       onHandleTextFixedWidthAnnotation(layer, layer.fragments)
     }
   })
@@ -321,5 +298,31 @@ export function onHandleTextFixedWidthAnnotation(layer, fragments) {
         borders: [{ color: DYNAMIC_COLOR }],
       },
     })
+  })
+}
+
+export const onAddChildAllFixedAnnotation = () => {
+  const document = sketch.fromNative(context.document)
+  // Iterate over each text layer in the selection, calling our function
+  document.selectedLayers.forEach((layer) => {
+    if (
+      layer.type === String(sketch.Types.SymbolInstance)
+      || layer.type === String(sketch.Types.Group)
+    ) {
+      const container = new sketch.Group({
+        parent: layer.parent,
+        name: '[Child] All Fixed Fragments',
+      })
+      // 1. find the element.
+      // 2. put Rect in the empty spacing.
+      new sketch.Shape({
+        parent: container,
+        frame: new sketch.Rectangle(layer.frame.x, layer.frame.y, layer.frame.width, layer.frame.height),
+        style: {
+          fills: [],
+          borders: [{ color: DYNAMIC_COLOR }],
+        },
+      })
+    }
   })
 }

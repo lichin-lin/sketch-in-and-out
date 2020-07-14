@@ -56,6 +56,12 @@
       "handler": "onAddTextFixedWidthAnnotation",
       "name": "[Text] Fixed Width",
       "identifier": "onAddTextFixedWidthAnnotation"
+    },
+    {
+      "script": "./add-spacing.js",
+      "handler": "onAddChildAllFixedAnnotation",
+      "name": "[Child] Fixed Width",
+      "identifier": "onAddChildAllFixedAnnotation"
     }
   ],
   "menu": {
@@ -65,7 +71,8 @@
       "-",
       "onAddTextAllFixedAnnotation",
       "onAddTextAllDynamicAnnotation",
-      "onAddTextFixedWidthAnnotation"
+      "onAddTextFixedWidthAnnotation",
+      "onAddChildAllFixedAnnotation"
     ]
   }
 }
