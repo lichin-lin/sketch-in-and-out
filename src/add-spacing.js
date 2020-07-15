@@ -316,13 +316,22 @@ export const onAddChildAllFixedAnnotation = () => {
       })
 
       // 1. find the element. (only one layer deep)
-      if (layer.type === String(sketch.Types.Group)) {
-        const children = layer.sketchObject.children().slice(1)
+      if (layer.type === String(sketch.Types.Group)
+       || layer.type === String(sketch.Types.SymbolInstance)
+      ) {
+        const children = layer.sketchObject.children()
         let arr = []
         children.forEach(nativelayer => {
           const wrappedLayer = sketch.fromNative(nativelayer);
-          console.log(wrappedLayer);
-          arr.push([wrappedLayer.frame.x, wrappedLayer.frame.x + wrappedLayer.frame.width])
+          console.log(
+            wrappedLayer.parent.id,
+            layer.id,
+          );
+          // Since the selected element will include EVERY sub-layer children,
+          // put a checker here to filter out too-deep children
+          if (wrappedLayer.parent.id === layer.id) {
+            arr.push([wrappedLayer.frame.x, wrappedLayer.frame.x + wrappedLayer.frame.width])
+          }
         });
         console.log(
           arr.sort((a, b) => a[0] - b[0]),
@@ -333,21 +342,25 @@ export const onAddChildAllFixedAnnotation = () => {
         const yOffset = (layer.frame.height / 2) - (24 / 2);
         [...new Array(arr.length + 1)].forEach((element, id) => {
           if (id === 0) {
-            console.log('first');
-            console.log(0, arr[id][0]);
+            // console.log('first');
+            // console.log(0, arr[id][0]);
             if (arr[id][0] !== 0) {
               new sketch.Shape({
                 parent: container,
                 frame: new sketch.Rectangle(0, yOffset, arr[id][0], 24),
                 style: {
                   fills: [FIXED_COLOR],
-                  border: null
+                  borders: [
+                    {
+                      enabled: false
+                    }
+                  ]
                 },
               })  
             }
           } else if (id === arr.length) {
-            console.log('last');
-            console.log(arr[id - 1][1], layer.frame.width);
+            // console.log('last');
+            // console.log(arr[id - 1][1], layer.frame.width);
             if (arr[id - 1][1] !== layer.frame.width) {
               const dist = layer.frame.width - arr[id - 1][1]
               new sketch.Shape({
@@ -355,34 +368,32 @@ export const onAddChildAllFixedAnnotation = () => {
                 frame: new sketch.Rectangle(arr[id - 1][1], yOffset, dist, 24),
                 style: {
                   fills: [FIXED_COLOR],
-                  border: null
+                  borders: [
+                    {
+                      enabled: false
+                    }
+                  ]
                 },
               })  
             }
           } else {
-            console.log(arr[id - 1][1], arr[id][0]);
+            // console.log(arr[id - 1][1], arr[id][0]);
             const dist = arr[id][0] - arr[id - 1][1]
             new sketch.Shape({
               parent: container,
               frame: new sketch.Rectangle(arr[id - 1][1], yOffset, dist, 24),
               style: {
                 fills: [FIXED_COLOR],
-                border: null
+                borders: [
+                  {
+                    enabled: false
+                  }
+                ]
               },
             })
           }
         })
       }
-      // const x = [1, 2, 3]
-      // x.forEach((x, id) => {
-      //   new sketch.Shape({
-      //     parent: container,
-      //     frame: new sketch.Rectangle(0, 0, layer.frame.width / 3, 24),
-      //     style: {
-      //       fills: [FIXED_COLOR],
-      //     },
-      //   })        
-      // })
     }
   })
 }
