@@ -4,12 +4,12 @@ import UI from 'sketch/ui'
 import sketch from 'sketch'
 const FIXED_COLOR = '#FF5544';
 const DYNAMIC_COLOR = '#0AF';
-const webviewIdentifier = 'my-plugin.webview'
+const webviewIdentifier = 'spacing-annotation.webview'
 
 export default function (context) {
   const options = {
     identifier: webviewIdentifier,
-    width: 512,
+    width: 540,
     height: 240,
     show: false,
     alwaysOnTop: true,

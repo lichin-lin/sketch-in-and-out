@@ -1,5 +1,9 @@
 /* some default styles to make the view more native like */
 
+:root {
+  --FIXED_COLOR: #FF5544;
+  --DYNAMIC_COLOR: #0AF;
+}
 html {
   box-sizing: border-box;
   background: transparent;
@@ -35,5 +39,37 @@ body {
 }
 
 .row {
-  margin-bottom: 8px;
+  padding: 16px;
+  width: 100%;
+}
+
+button[id='All Fixed'],
+button[id='Horizontal Fixed'],
+button[id='Vertical Fixed'] {
+  border: 2px solid var(--FIXED_COLOR) !important;
+}
+
+button[id='All Dynamic'],
+button[id='Horizontal Dynamic'],
+button[id='Vertical Dynamic'] {
+  border: 2px solid var(--DYNAMIC_COLOR) !important;
+}
+
+button[id='Width Fixed'] {
+  border: 2px solid var(--FIXED_COLOR) !important;
+  border-left-color: var(--DYNAMIC_COLOR) !important;
+  border-right-color: var(--DYNAMIC_COLOR) !important;
+}
+
+button[id='Height Fixed'] {
+  border: 2px solid var(--FIXED_COLOR) !important;
+  border-top-color: var(--DYNAMIC_COLOR) !important;
+  border-bottom-color: var(--DYNAMIC_COLOR) !important;
+}
+
+button img {
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  margin-right: 8px;
 }
