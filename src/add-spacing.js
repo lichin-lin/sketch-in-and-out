@@ -69,7 +69,7 @@ export function onShutdown() {
 
 const processFragments = (container, fragments, action) => {
   // We first move the container to the back of the document.
-  container.moveToBack()
+  // container.moveToBack()
   // Then iterate through each fragment, executing the action.
   fragments.forEach((fragment, i) => action(container, fragment, i))
   // Finally, we adjust the container to enclose any new layers we've placed in it.
@@ -166,13 +166,12 @@ export const onAddTextAnnotation = (context, annotationType) => {
   // Iterate over each text layer in the selection, calling our addBaselines function
   document.selectedLayers.forEach((layer) => {
     if (true || layer.type === String(sketch.Types.Text)) {
-      onHandleTextsAnnotation(layer, layer.fragments, annotationType)
+      onHandleTextsAnnotation(context, layer, layer.fragments, annotationType)
     }
   })
 }
 
-export const onHandleTextsAnnotation = (layer, fragments, annotationType) => {
-  // First we make a new group to contain our line fragments
+export const onHandleTextsAnnotation = (context, layer, fragments, annotationType) => {
   const container = new sketch.Group({
     parent: layer.parent,
     name: `[Pico Annotation] ${annotationType} Line Fragments`,
@@ -181,6 +180,18 @@ export const onHandleTextsAnnotation = (layer, fragments, annotationType) => {
   processFragments(container, fragments, (group, fragment, index) => {
     mappingTextAnnotationStyle(annotationType, layer, group, fragment)
   })
+
+  // find layer's parent that is artboard
+  setTimeout(() => {
+    let duplicateLayerToCopy = container.duplicate()
+    let currentArtboard = layer;
+    while (currentArtboard && currentArtboard?.type !== sketch?.Types?.Artboard) {
+      currentArtboard = currentArtboard.parent
+    }
+    duplicateLayerToCopy.parent = currentArtboard
+    // x, y need reorder
+    // https://sketchplugins.com/d/670-set-layers-x-coordinate-relative-to-artboard/3
+  }, 1000)
 }
 
 export  const onAddChildrenAnnotation = (context, annotationType) => {
