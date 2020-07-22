@@ -194,16 +194,15 @@ export const onHandleTextsAnnotation = (context, layer, fragments, annotationTyp
   // find layer's parent that is artboard
   setTimeout(() => {
     let parentOffset = parentOffsetInArtboard(container);
-    let duplicateLayerToCopy = container.duplicate()
     let currentArtboard = layer;
     while (currentArtboard && currentArtboard?.type !== sketch?.Types?.Artboard) {
       currentArtboard = currentArtboard.parent
     }
-    duplicateLayerToCopy.parent = currentArtboard
-    duplicateLayerToCopy.x = duplicateLayerToCopy.x + parentOffset.x
-    duplicateLayerToCopy.y = duplicateLayerToCopy.y + parentOffset.y
     // https://sketchplugins.com/d/670-set-layers-x-coordinate-relative-to-artboard/3
-  }, 1000)
+    container.parent = currentArtboard
+    container.frame.x = container.frame.x + parentOffset.x
+    container.frame.y = container.frame.y + parentOffset.y
+  }, 1)
 }
 
 export  const onAddChildrenAnnotation = (context, annotationType) => {
@@ -230,7 +229,10 @@ export  const onAddChildrenAnnotation = (context, annotationType) => {
           const wrappedLayer = sketch.fromNative(nativelayer);
           // Since the selected element will include EVERY sub-layer children,
           // put a checker here to filter out too-deep children
-          if (wrappedLayer.parent.id === layer.id) {
+          if (
+            wrappedLayer.parent.id === layer.id
+            && wrappedLayer.name !== 'pico_bg'
+          ) {
             arr.push(annotationType.includes('Horizontal')
               ? [wrappedLayer.frame.x, wrappedLayer.frame.x + wrappedLayer.frame.width]
               : [wrappedLayer.frame.y, wrappedLayer.frame.y + wrappedLayer.frame.height])
@@ -304,7 +306,7 @@ export  const onAddChildrenAnnotation = (context, annotationType) => {
               if (arr[id][0] !== 0) {
                 new sketch.Shape({
                   parent: container,
-                  frame: new sketch.Rectangle(xOffset, 0, 24, arr[id][1]),
+                  frame: new sketch.Rectangle(xOffset, 0, 24, arr[id][0]),
                   style: {
                     fills: [{ color: annotationType.includes('Fixed') ? FIXED_COLOR : DYNAMIC_COLOR }],
                     borders: [
@@ -319,7 +321,7 @@ export  const onAddChildrenAnnotation = (context, annotationType) => {
               // console.log('last');
               // console.log(arr[id - 1][1], layer.frame.width);
               if (arr[id - 1][1] !== layer.frame.height) {
-                const dist = layer.frame.height - arr[id - 1][0]
+                const dist = layer.frame.height - arr[id - 1][1]
                 new sketch.Shape({
                   parent: container,
                   frame: new sketch.Rectangle(xOffset, arr[id - 1][1], 24, dist),
