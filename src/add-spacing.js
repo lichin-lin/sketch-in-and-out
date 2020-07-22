@@ -66,6 +66,16 @@ export function onShutdown() {
     existingWebview.close()
   }
 }
+const parentOffsetInArtboard = (layer) => {
+  let offset = {x: 0, y: 0};
+  let parent = layer.parent;
+  while (parent.name && parent.type !== 'Artboard') {
+    offset.x += parent.frame.x;
+    offset.y += parent.frame.y;
+    parent = parent.parent;
+  }
+  return offset;
+}
 
 const processFragments = (container, fragments, action) => {
   // We first move the container to the back of the document.
@@ -183,13 +193,15 @@ export const onHandleTextsAnnotation = (context, layer, fragments, annotationTyp
 
   // find layer's parent that is artboard
   setTimeout(() => {
+    let parentOffset = parentOffsetInArtboard(container);
     let duplicateLayerToCopy = container.duplicate()
     let currentArtboard = layer;
     while (currentArtboard && currentArtboard?.type !== sketch?.Types?.Artboard) {
       currentArtboard = currentArtboard.parent
     }
     duplicateLayerToCopy.parent = currentArtboard
-    // x, y need reorder
+    duplicateLayerToCopy.x = duplicateLayerToCopy.x + parentOffset.x
+    duplicateLayerToCopy.y = duplicateLayerToCopy.y + parentOffset.y
     // https://sketchplugins.com/d/670-set-layers-x-coordinate-relative-to-artboard/3
   }, 1000)
 }
