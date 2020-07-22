@@ -86,6 +86,25 @@ const processFragments = (container, fragments, action) => {
   container.adjustToFit()
 }
 
+const isContainByOther = (current, list) => {
+  let result = false
+  list.forEach((element, index) => {
+    if ((current[0] > element[0]) && (current[1] < element[1])) {
+      result = true
+    }
+  })
+  return result;
+}
+
+const removeSmallFrameContainByOther = (list) => {
+  return list.reduce((acc, currentValue, index, array) => {
+    if (isContainByOther(currentValue, array)) {
+      return [...acc]
+    } else {
+      return [...acc, currentValue]
+    }
+  }, [])
+}
 const mappingTextAnnotationStyle = (annotationType, layer, group, fragment) => {
   switch (annotationType) {
     case 'All Fixed':
@@ -239,6 +258,8 @@ export  const onAddChildrenAnnotation = (context, annotationType) => {
           }
         });
         arr.sort((a, b) => a[0] - b[0])
+        // remove some small shape that's contain by other
+        arr = removeSmallFrameContainByOther(arr);
         if (annotationType.includes('Horizontal')) {
           // 2. put Rect in the empty spacing.
           const yOffset = (layer.frame.height / 2) - (24 / 2);
@@ -315,7 +336,7 @@ export  const onAddChildrenAnnotation = (context, annotationType) => {
                       }
                     ]
                   },
-                })  
+                })
               }
             } else if (id === arr.length) {
               // console.log('last');
