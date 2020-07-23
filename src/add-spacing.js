@@ -108,8 +108,24 @@ const removeSmallFrameContainByOther = (list) => {
 const getLocalRect = (layer, fragment) => {
   return (layer.type === String(sketch.Types.Text)) ? layer.localRectToParentRect(fragment.rect) : layer.frame
 }
+
+const moveFrameToNearestArtboard = (container, layer) => {
+  // find layer's parent that is artboard
+  setTimeout(() => {
+    let parentOffset = parentOffsetInArtboard(container);
+    let currentArtboard = layer;
+    while (currentArtboard && currentArtboard?.type !== sketch?.Types?.Artboard) {
+      currentArtboard = currentArtboard.parent
+    }
+    // https://sketchplugins.com/d/670-set-layers-x-coordinate-relative-to-artboard/3
+    container.parent = currentArtboard
+    container.frame.x = container.frame.x + parentOffset.x
+    container.frame.y = container.frame.y + parentOffset.y
+  }, 1)
+}
 const mappingTextAnnotationStyle = (annotationType, layer, group, fragment = null) => {
   let localRect = getLocalRect(layer, fragment)
+  let _localRect = null
   switch (annotationType) {
     case 'All Fixed':
       return (() => {
@@ -137,50 +153,60 @@ const mappingTextAnnotationStyle = (annotationType, layer, group, fragment = nul
     case 'Height Fixed':
       return (() => {
         // TOP
-        localRect.y += localRect.height
-        localRect.height = 0
+        _localRect = {
+          x: localRect.x,
+          y: localRect.y + localRect.height,
+          width: localRect.width,
+          height: 0,
+        }
         new sketch.Shape({
           parent: group,
-          frame: localRect,
+          frame: _localRect,
           style: {
             fills: [],
             borders: [{ color: annotationType === 'Height Fixed' ? DYNAMIC_COLOR : FIXED_COLOR }],
           },
         })
         // BOTTOM
-        localRect = getLocalRect(layer, fragment)
-        localRect.height = 0
+        _localRect = {
+          x: localRect.x,
+          y: localRect.y,
+          width: localRect.width,
+          height: 0,
+        }
         new sketch.Shape({
           parent: group,
-          frame: localRect,
+          frame: _localRect,
           style: {
             fills: [],
             borders: [{ color: annotationType === 'Height Fixed' ? DYNAMIC_COLOR : FIXED_COLOR }],
           },
         })
         // LEFT
-        localRect = getLocalRect(layer, fragment)
-        localRect.x += localRect.width
-        localRect.y += -0.5
-        localRect.height = localRect.height + 1
-        localRect.width = 0
+        _localRect = {
+          x: localRect.x + localRect.width,
+          y: localRect.y - 0.5,
+          width: 0,
+          height: localRect.height + 1,
+        }
         new sketch.Shape({
           parent: group,
-          frame: localRect,
+          frame: _localRect,
           style: {
             fills: [],
             borders: [{ color: annotationType === 'Height Fixed' ? FIXED_COLOR : DYNAMIC_COLOR }],
           },
         })
         // RIGHT
-        localRect = getLocalRect(layer, fragment)
-        localRect.height = localRect.height
-        localRect.y += -0.5
-        localRect.height = localRect.height + 1
-        localRect.width = 0
+        _localRect = {
+          x: localRect.x,
+          y: localRect.y - 0.5,
+          width: 0,
+          height: localRect.height + 1,
+        }
         new sketch.Shape({
           parent: group,
-          frame: localRect,
+          frame: _localRect,
           style: {
             fills: [],
             borders: [{ color: annotationType === 'Height Fixed' ? FIXED_COLOR : DYNAMIC_COLOR }],
@@ -213,108 +239,103 @@ export const onHandleTextsAnnotation = (context, layer, fragments, annotationTyp
     })
     // [TODO] merge it back to same function
   } else {
-    let localRect = layer.frame
-    switch (annotationType) {
-      case 'All Fixed':
-        new sketch.Shape({
-          parent: container,
-          frame: localRect,
-          style: {
-            fills: [],
-            borders: [{ color: FIXED_COLOR }],
-          },
-        })
-        break;
-      case 'All Dynamic':
-        new sketch.Shape({
-          parent: container,
-          frame: localRect,
-          style: {
-            fills: [],
-            borders: [{ color: DYNAMIC_COLOR }],
-          },
-        })
-        break;
-      case 'Width Fixed':
-      case 'Height Fixed':
-          // TOP
-          localRect = {
-            x: layer.frame.x,
-            y: layer.frame.y + layer.frame.height,
-            width: layer.frame.width,
-            height: 0,
-          }
-          new sketch.Shape({
-            parent: container,
-            frame: localRect,
-            style: {
-              fills: [],
-              borders: [{ color: annotationType === 'Height Fixed' ? DYNAMIC_COLOR : FIXED_COLOR }],
-            },
-          })
-          // BOTTOM
-          localRect = {
-            x: layer.frame.x,
-            y: layer.frame.y,
-            width: layer.frame.width,
-            height: 0,
-          }
-          new sketch.Shape({
-            parent: container,
-            frame: localRect,
-            style: {
-              fills: [],
-              borders: [{ color: annotationType === 'Height Fixed' ? DYNAMIC_COLOR : FIXED_COLOR }],
-            },
-          })
-          // LEFT
-          localRect = {
-            x: layer.frame.x + layer.frame.width,
-            y: layer.frame.y - 0.5,
-            width: 0,
-            height: layer.frame.height + 1,
-          }
-          new sketch.Shape({
-            parent: container,
-            frame: localRect,
-            style: {
-              fills: [],
-              borders: [{ color: annotationType === 'Height Fixed' ? FIXED_COLOR : DYNAMIC_COLOR }],
-            },
-          })
-          // RIGHT
-          localRect = {
-            x: layer.frame.x,
-            y: layer.frame.y - 0.5,
-            width: 0,
-            height: layer.frame.height + 1,
-          }
-          new sketch.Shape({
-            parent: container,
-            frame: localRect,
-            style: {
-              fills: [],
-              borders: [{ color: annotationType === 'Height Fixed' ? FIXED_COLOR : DYNAMIC_COLOR }],
-            },
-          })
-          break;
-      default:
-          break;
-    }
+    // let localRect = layer.frame
+    console.log(
+      layer
+    );
+    console.log(
+      container
+    );
+    mappingTextAnnotationStyle(annotationType, layer, container, null)
+    // switch (annotationType) {
+    //   case 'All Fixed':
+    //     new sketch.Shape({
+    //       parent: container,
+    //       frame: localRect,
+    //       style: {
+    //         fills: [],
+    //         borders: [{ color: FIXED_COLOR }],
+    //       },
+    //     })
+    //     break;
+    //   case 'All Dynamic':
+    //     new sketch.Shape({
+    //       parent: container,
+    //       frame: localRect,
+    //       style: {
+    //         fills: [],
+    //         borders: [{ color: DYNAMIC_COLOR }],
+    //       },
+    //     })
+    //     break;
+    //   case 'Width Fixed':
+    //   case 'Height Fixed':
+    //       // TOP
+    //       localRect = {
+    //         x: layer.frame.x,
+    //         y: layer.frame.y + layer.frame.height,
+    //         width: layer.frame.width,
+    //         height: 0,
+    //       }
+    //       new sketch.Shape({
+    //         parent: container,
+    //         frame: localRect,
+    //         style: {
+    //           fills: [],
+    //           borders: [{ color: annotationType === 'Height Fixed' ? DYNAMIC_COLOR : FIXED_COLOR }],
+    //         },
+    //       })
+    //       // BOTTOM
+    //       localRect = {
+    //         x: layer.frame.x,
+    //         y: layer.frame.y,
+    //         width: layer.frame.width,
+    //         height: 0,
+    //       }
+    //       new sketch.Shape({
+    //         parent: container,
+    //         frame: localRect,
+    //         style: {
+    //           fills: [],
+    //           borders: [{ color: annotationType === 'Height Fixed' ? DYNAMIC_COLOR : FIXED_COLOR }],
+    //         },
+    //       })
+    //       // LEFT
+    //       localRect = {
+    //         x: layer.frame.x + layer.frame.width,
+    //         y: layer.frame.y - 0.5,
+    //         width: 0,
+    //         height: layer.frame.height + 1,
+    //       }
+    //       new sketch.Shape({
+    //         parent: container,
+    //         frame: localRect,
+    //         style: {
+    //           fills: [],
+    //           borders: [{ color: annotationType === 'Height Fixed' ? FIXED_COLOR : DYNAMIC_COLOR }],
+    //         },
+    //       })
+    //       // RIGHT
+    //       localRect = {
+    //         x: layer.frame.x,
+    //         y: layer.frame.y - 0.5,
+    //         width: 0,
+    //         height: layer.frame.height + 1,
+    //       }
+    //       new sketch.Shape({
+    //         parent: container,
+    //         frame: localRect,
+    //         style: {
+    //           fills: [],
+    //           borders: [{ color: annotationType === 'Height Fixed' ? FIXED_COLOR : DYNAMIC_COLOR }],
+    //         },
+    //       })
+    //       break;
+    //   default:
+    //       break;
+    // }
   }
-
-  // find layer's parent that is artboard
-  setTimeout(() => {
-    let parentOffset = parentOffsetInArtboard(container);
-    let currentArtboard = layer;
-    while (currentArtboard && currentArtboard?.type !== sketch?.Types?.Artboard) {
-      currentArtboard = currentArtboard.parent
-    }
-    // https://sketchplugins.com/d/670-set-layers-x-coordinate-relative-to-artboard/3
-    container.parent = currentArtboard
-    container.frame.x = container.frame.x + parentOffset.x
-    container.frame.y = container.frame.y + parentOffset.y
-  }, 1)
+  moveFrameToNearestArtboard(container,layer)
 }
 
 export  const onAddChildrenAnnotation = (context, annotationType) => {
@@ -467,6 +488,8 @@ export  const onAddChildrenAnnotation = (context, annotationType) => {
             }
           })
         }
+
+        moveFrameToNearestArtboard(container,layer.parent)
       }
     }
   })
